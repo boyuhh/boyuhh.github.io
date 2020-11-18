@@ -23,21 +23,34 @@
             window.addEventListener('load', _ => {
                 let futrzak = document.getElementById("futrzak");
                 let supertramptraveling = document.getElementById("supertramptraveling");
-                if (futrzak != null && supertramptraveling != null) {
-                    supertramptraveling.play();
-                    futrzak.style.display = "block";
-                    setInterval(() => {
-                        futrzak.style.filter = "invert(" + (zetony ? "100%" : "0") + ")";
-                        zetony = !zetony;
-                    }, 60);
-                }
+                let xXx = document.getElementById("xxx");
+                let kidrax = document.getElementById("kidrax");
+
+                xXx.addEventListener('click', __ => {
+
+                
+                    if (futrzak != null && supertramptraveling != null) {
+                        xXx.style.display = "none";
+                        kidrax.style.display = "block";
+                        supertramptraveling.play();
+                        futrzak.style.display = "block";
+                        setInterval(() => {
+                            futrzak.style.filter = "invert(" + (zetony ? "100%" : "0") + ")";
+                            zetony = !zetony;
+                        }, 60);
+                    }
+                });
+
             });
         </script>
     </head>
     <body>
         <audio id="supertramptraveling" src="uhhboy.ogg" loop></audio>
-        <div class="shweed">
+        <div class="shweed" id="kidrax" style="display: none;">
             <img class="napalony1215" src="uhhboy.png" id="futrzak" style="display: none;" />
+        </div>
+        <div class="shweed">
+            <img id="xxx" class="michaszek" style="margin: auto;" src="https://www.mieszko.pl/Media/catalog/product/20/source_source-michaszki-owijka.png" />
         </div>
     </body>
 </html>
