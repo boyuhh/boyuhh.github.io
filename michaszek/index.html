@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>&nbsp;</title>
+        <style>
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    /*background: url('background.jpg') 0px 0px repeat-x;*/ 
+    background-size: 100% 100%;
+}
+
+.michaszek {
+    transition: 400ms ease;
+}
+
+.michaszek:hover {
+    transform: scale(1.1);
+}
+
+.michaszek:active {
+    transform: scale(0.8);
+}
+
+.faded-out {
+    opacity: 0;
+}
+
+.invisible {
+    display: none;
+}
+
+#start-screen {
+    display: grid;
+    height: 100vh;
+}
+
+#app {
+    transition: 400ms ease;
+    display: none;
+    opacity: 0;
+}
+
+#napalony1215 {
+    width: 20%;
+}
+
+        </style>
+        <script>
+var x = 0;
+var sebaY = 0;
+var sebaWidth = -1;
+var sebaHeight = -1;
+var napalony1215 = null;
+var michaszekWidth = -1;
+var michaszekHeight = -1;
+var michaszki = new Array();
+var catchedMichaszki = 0;
+
+var michaszeksLeftToSebaVocal = 0; // will be played on first michaszek
+var sebaVocals = new Array("bilgunkaa.ogg", "domseby.ogg", "kidramaniak.ogg");
+
+var bgSpeed = 10;
+var michaszkiSpawnerEnabled = true;
+var michaszkiContainer = null;
+
+function generateNewMichaszek() {
+    let michaszek = {
+        id: generateMichaszekId(7),
+        x: window.innerWidth,
+        y: Math.random() * (window.innerHeight - michaszekHeight),
+        element: document.createElement("img")
+    };
+    michaszek.element.src = "michaszek.png";
+    michaszek.element.style.position = "absolute";
+    michaszek.element.id = michaszek.id;
+    michaszkiContainer.appendChild(michaszek.element);
+    michaszki.push(michaszek);
+}
+
+function generateMichaszekId(length) {
+   var result = '';
+   var characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+   var charactersLength = characters.length;
+   for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+   }
+   return result;
+}
+
+function michaszkiSpawner() {
+    generateNewMichaszek();
+    setTimeout(michaszkiSpawner, (Math.random() * 2500) + 2500);
+}
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => 
+        setTimeout(() => {
+            resolve(true);
+        }, ms
+    ));
+}
+
+function onGameStart(ev) {
+    (async () => {
+        document.getElementById("start-button").classList.add("faded-out");
+        await wait(400);
+
+        document.getElementById("start-screen").style.display = "none";
+        document.body.style.background = "url('background.jpg') 0px 0px repeat-x";
+        document.body.style.backgroundSize = "100% 100%";
+        document.getElementById("app").style.display = "block";
+        document.getElementById("app").style.opacity = 1;
+        document.getElementById("sebaloop").volume = 0.5;
+        document.getElementById("sebaloop").play();
+        start();
+    })();
+}
+
+function onSebaPoint(collidingMichaszek) {
+    collidingMichaszek.remove();
+    if (michaszeksLeftToSebaVocal > 0) {
+        michaszeksLeftToSebaVocal--;
+    } else {
+        michaszeksLeftToSebaVocal = 40 //Math.floor(Math.random() * 15);
+
+        document.getElementById("seba").src = sebaVocals[Math.floor(Math.random() * sebaVocals.length)];
+        document.getElementById("seba").play();
+    }
+}
+
+function update() {
+    /* update sizes for calculation */
+    if (sebaWidth < 0) {
+        sebaWidth = napalony1215.width;
+        sebaHeight = napalony1215.height;
+    }
+
+    if (michaszekWidth < 0 && michaszki.length > 0) { // no width of michaszek - set initial by first element
+        michaszekWidth = michaszki[0].element.width;
+        michaszekHeight = michaszki[0].element.height;
+    }
+
+    /* scroll background */
+    document.body.style.backgroundPositionX = (-x * bgSpeed) + 'px';
+    x++;
+
+    /* update seba position */
+    napalony1215.style.marginTop = (sebaY - (napalony1215.height / 2)) + "px";
+
+    /* update michaszkis */
+    michaszki.forEach(michaszek => {
+        michaszek.x -= bgSpeed;
+
+        /* check collision with seba */
+        if (michaszek.x < sebaWidth && ((michaszek.y + michaszekHeight) < sebaY && (sebaY + sebaHeight) > michaszek.y)) { // in range of seba
+            onSebaPoint(michaszek.element);
+        }
+
+        /* clean up old michaszek if not cleaned up before */
+        if (michaszek.x < -michaszekWidth) {
+            michaszki = michaszki.filter(m => m != michaszek);
+            michaszek.element.remove();
+        }
+
+        /* move michaszek */
+        let michaszekElem = michaszek.element;
+        michaszekElem.style.left = michaszek.x + "px";
+        michaszekElem.style.top = michaszek.y + "px";
+    });
+}
+
+function start() {
+    michaszkiContainer = document.getElementById("michaszki-container");
+    napalony1215 = document.getElementById("napalony1215");
+
+    /* set up handlers */
+    window.addEventListener("mousemove", ev => {
+        sebaY = ev.clientY;
+    });
+
+    setInterval(update, 10);
+    michaszkiSpawner();
+}
+
+window.addEventListener("load", ev => {
+    document.getElementById("start-button").addEventListener("click", ev => onGameStart(ev));
+})
+    </script>
+    </head>
+    <body>
+        <div id="app">
+            <audio id="seba"></audio>
+            <audio id="sebaloop" src="seba.mp3" autoplay loop style="display: none;"></audio>
+            <img id="napalony1215" src="napalony1215.png" />
+            <div id="michaszki-container"></div>    
+        </div>
+
+        <div id="start-screen">
+            <img id="start-button" class="michaszek" style="margin: auto;" src="https://www.mieszko.pl/Media/catalog/product/20/source_source-michaszki-owijka.png" />
+        </div>
+    </body>
+</html>
