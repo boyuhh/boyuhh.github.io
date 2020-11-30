@@ -74,6 +74,10 @@ var napalony1215 = null;
 var michaszekWidth = -1;
 var michaszekHeight = -1;
 var michaszki = new Array();
+var catchedMichaszki = 0;
+
+var michaszeksLeftToSebaVocal = 0; // will be played on first michaszek
+var sebaVocals = new Array("bilgunkaa.ogg", "domseby.ogg", "kidramaniak.ogg");
 
 var bgSpeed = 10;
 var michaszkiSpawnerEnabled = true;
@@ -83,7 +87,7 @@ function generateNewMichaszek() {
     let michaszek = {
         id: generateMichaszekId(7),
         x: window.innerWidth,
-        y: Math.random() * window.innerHeight,
+        y: Math.random() * (window.innerHeight - michaszekHeight),
         element: document.createElement("img")
     };
     michaszek.element.src = "michaszek.png";
@@ -134,6 +138,14 @@ function onGameStart(ev) {
 
 function onSebaPoint(collidingMichaszek) {
     collidingMichaszek.remove();
+    if (michaszeksLeftToSebaVocal > 0) {
+        michaszeksLeftToSebaVocal--;
+    } else {
+        michaszeksLeftToSebaVocal = 40 //Math.floor(Math.random() * 15);
+
+        document.getElementById("seba").src = sebaVocals[Math.floor(Math.random() * sebaVocals.length)];
+        document.getElementById("seba").play();
+    }
 }
 
 function update() {
@@ -160,7 +172,7 @@ function update() {
         michaszek.x -= bgSpeed;
 
         /* check collision with seba */
-        if (michaszek.x < sebaWidth && ((michaszek.y + michaszekHeight) < sebaY && michaszek.y > (sebaY - sebaHeight))) { // in range of seba
+        if (michaszek.x < sebaWidth && ((michaszek.y + michaszekHeight) < sebaY && (sebaY + sebaHeight) > michaszek.y)) { // in range of seba
             onSebaPoint(michaszek.element);
         }
 
@@ -197,6 +209,7 @@ window.addEventListener("load", ev => {
     </head>
     <body>
         <div id="app">
+            <audio id="seba"></audio>
             <audio id="sebaloop" src="seba.mp3" autoplay loop style="display: none;"></audio>
             <img id="napalony1215" src="napalony1215.png" />
             <div id="michaszki-container"></div>    
