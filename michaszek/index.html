@@ -92,6 +92,7 @@ function generateNewMichaszek() {
     };
     michaszek.element.src = "michaszek.png";
     michaszek.element.style.position = "absolute";
+    michaszek.element.style.width = "15%";
     michaszek.element.id = michaszek.id;
     michaszkiContainer.appendChild(michaszek.element);
     michaszki.push(michaszek);
@@ -108,7 +109,8 @@ function generateMichaszekId(length) {
 }
 
 function michaszkiSpawner() {
-    generateNewMichaszek();
+    if (michaszkiSpawnerEnabled)
+        generateNewMichaszek();
     setTimeout(michaszkiSpawner, (Math.random() * 2500) + 2500);
 }
 
@@ -172,7 +174,8 @@ function update() {
         michaszek.x -= bgSpeed;
 
         /* check collision with seba */
-        if (michaszek.x < sebaWidth && ((michaszek.y + michaszekHeight) < sebaY && (sebaY + sebaHeight) > michaszek.y)) { // in range of seba
+        if (michaszek.x < sebaWidth && ((michaszek.y + michaszekHeight) < sebaY && (sebaY - sebaHeight) < michaszek.y)) { // in range of seba
+            debugger;
             onSebaPoint(michaszek.element);
         }
 
